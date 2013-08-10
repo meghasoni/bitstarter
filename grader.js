@@ -6,6 +6,7 @@ var rest = require('restler');
 var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
+var URL_DEFAULT = "https://github.com/meghasoni/bitstarter/blob/master/index.html";
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -45,9 +46,21 @@ if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
-        .option('-url, --url <url>','url path',clone(assertFileExist),URL_DEFAULT)
+        .option('-url, --url <url>','url path',URL_DEFAULT)
         .parse(process.argv);
+    if(program.url)
+   {
+     rest.get(program.url).on('complete',function(result){
+     fs.writeFileSync("myfile.html",result);
+     var checkJson = checkHtmlFile("myfile.html", program.checks);
+
+   });         
+    }
+
+else {
+
     var checkJson = checkHtmlFile(program.file, program.checks);
+}
     var outJson = JSON.stringify(checkJson, null, 4);
     console.log(outJson);
 } else {
